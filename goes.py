@@ -192,7 +192,9 @@ def main():
     dispatcher.add_handler(T.MessageHandler(T.Filters.text, command_echo))
 
     j = updater.job_queue
-    job_minute = j.run_repeating(callback_minute, interval=60, first=0)
+    job_interval = 60 * 10
+    # job_interval = 60
+    job_for_check = j.run_repeating(callback_minute, interval=job_interval, first=0)
 
     print("finish set up bot.")
 
