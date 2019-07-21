@@ -196,7 +196,7 @@ def main():
 
     print("finish set up bot.")
 
-    use_polling = True
+    use_polling = False
     if use_polling:
         updater.start_polling()
     else:
