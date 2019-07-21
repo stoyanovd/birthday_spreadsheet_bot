@@ -32,12 +32,15 @@ def download_sheets():
 
 def check_spreadsheet_errors(cell_list, header_rows):
     well_formed_cell_list = []
+    cell_list = cell_list[1:]
     error_message = ''
     for i in range(len(cell_list)):
         row = cell_list[i]
         c = len(error_message)
         if len(row) < 3:
             error_message += os.linesep + 'Строка ' + str(i + 1 + header_rows) + '. Не заполнена целиком.'
+        if row[0] == '' and row[1] == '' and row[2] == '':
+            continue
         if row[0].lower() not in MONTHES_DICT:
             error_message += os.linesep + 'Строка ' + str(i + 1 + header_rows) + '. Месяц не корректен.'
         if not row[1].isdigit():
