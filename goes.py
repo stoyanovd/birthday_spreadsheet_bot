@@ -69,6 +69,10 @@ def command_today(bot, update):
     update.message.reply_text(t)
 
 
+def command_cron():
+    pass
+
+
 def command_echo(bot, update):
     # global d
     bot.send_message(chat_id=update.message.chat_id, text="let's work with it")
@@ -96,7 +100,7 @@ def main():
 
     print("finish set up bot.")
 
-    use_polling = True
+    use_polling = False
     if use_polling:
         updater.start_polling()
     else:
