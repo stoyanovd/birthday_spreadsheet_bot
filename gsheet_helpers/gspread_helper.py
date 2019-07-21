@@ -37,13 +37,13 @@ def check_spreadsheet_errors(cell_list, header_rows):
         row = cell_list[i]
         c = len(error_message)
         if len(row) < 3:
-            error_message += 'Строка ' + str(i + 1 + header_rows) + '. Не заполнена целиком.'
+            error_message += os.linesep + 'Строка ' + str(i + 1 + header_rows) + '. Не заполнена целиком.'
         if row[0].lower() not in MONTHES_DICT:
-            error_message += 'Строка ' + str(i + 1 + header_rows) + '. Месяц не корректен.'
+            error_message += os.linesep + 'Строка ' + str(i + 1 + header_rows) + '. Месяц не корректен.'
         if not row[1].isdigit():
-            error_message += 'Строка ' + str(i + 1 + header_rows) + '. День месяца не корректен.'
+            error_message += os.linesep + 'Строка ' + str(i + 1 + header_rows) + '. День месяца не корректен.'
         if len(row[2]) == 0:
-            error_message += 'Строка ' + str(i + 1 + header_rows) + '. Именинник не заполнен.'
+            error_message += os.linesep + 'Строка ' + str(i + 1 + header_rows) + '. Именинник не заполнен.'
 
         if len(error_message) == c:
             well_formed_cell_list += [row]
@@ -73,4 +73,4 @@ def get_dates_persons_df():
     well_formed_cell_list, error_message = check_spreadsheet_errors(cell_list, header_rows=1)
 
     df = pandas_conversion(well_formed_cell_list)
-    return df
+    return df, error_message

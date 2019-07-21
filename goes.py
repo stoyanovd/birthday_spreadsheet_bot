@@ -20,8 +20,9 @@ BOT_USERS = None
 
 def refresh_gspread_and_bot_users():
     global BD_DF, BOT_USERS
-    BD_DF = gspread_helper.get_dates_persons_df()
+    BD_DF, error_message = gspread_helper.get_dates_persons_df()
     BOT_USERS = json.loads(os.environ.get(BD.BD_BOT_STIL_USERS))
+    return error_message
 
 
 ########################################################################
@@ -125,10 +126,15 @@ def send_today(bot, username, chat_id, is_income_question):
 def command_today(bot, update):
     username = update.message.from_user.username
     chat_id = update.message.chat_id
+
+    error_message = refresh_gspread_and_bot_users()
+    if error_message:
+        bot.send_message(chat_id=chat_id, text="У вас в Spreadsheet есть ошибки: " + error_message)
+
     send_today(bot, username, chat_id, False)
 
 
-def send_notifications_per_user(bot, job, user):
+def send_notifications_per_user(bot, job, user, error_message):
     # current_date = datetime.datetime.now().date()
     current_msk_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=3)).time()
     time_is_early = 'early' if current_msk_time < datetime.time(hour=7) else 'good'
@@ -151,6 +157,8 @@ def send_notifications_per_user(bot, job, user):
           'notification_for_user_today: ', notification_for_user_today)
 
     if notification_for_user_today == 0:
+        if error_message:
+            bot.send_message(chat_id=chat_id, text="У вас в Spreadsheet есть ошибки: " + error_message)
         send_today(bot, username, chat_id, True)
         # bot.send_message(chat_id=update.message.chat_id, text="let's work with it")
 
@@ -160,12 +168,12 @@ def callback_send_notifications_morning(bot, job):
         print('no rows in User. return')
         return
 
-    refresh_gspread_and_bot_users()
+    error_message = refresh_gspread_and_bot_users()
 
     users = list(User.select())
     print('users: ', users)
     for u in users:
-        send_notifications_per_user(bot, job, u)
+        send_notifications_per_user(bot, job, u, error_message)
 
 
 def command_echo(bot, update):
