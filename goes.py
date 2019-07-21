@@ -123,7 +123,7 @@ def send_today(bot, username, chat_id, is_income_question):
 
 
 def command_today(bot, update):
-    username = update.message.chat_id.username
+    username = update.message.from_user.username
     chat_id = update.message.chat_id
     send_today(bot, username, chat_id, False)
 
