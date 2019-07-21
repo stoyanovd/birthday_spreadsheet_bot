@@ -86,7 +86,7 @@ def command_echo(bot, update):
 def main():
     #################################################
     TELEGRAM_BOT_TOKEN = os.environ.get(BD.BD_BOT_TELEGRAM_BOT_TOKEN)
-    PORT = int(os.environ.get(BD.BD_BOT_PORT, '5000'))
+    PORT = int(os.environ.get(BD.PORT, '5000'))
     BOT_WEBHOOK_URL = os.environ.get(BD.BD_BOT_WEBHOOK_URL)
 
     updater = Updater(TELEGRAM_BOT_TOKEN)
