@@ -1,20 +1,18 @@
 import datetime
 import json
 import os
-
 import yaml
-
-from telegram import ext as T
 import logging
 
-from bd_const import env_variables as BD
-from gsheet_helpers import gspread_helper
+from telegram import ext as T
+import peewee as P
+from playhouse.db_url import connect
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
-import peewee as P
-from playhouse.db_url import connect
+from bd_const import env_variables as BD
+from gsheet_helpers import gspread_helper
 
 BD_DF = None
 BOT_USERS = None
