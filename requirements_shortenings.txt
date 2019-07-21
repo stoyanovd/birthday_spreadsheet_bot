@@ -1,27 +1,18 @@
-# default server
+python-telegram-bot==11.1.0
+# python-telegram-bot==12.0.0b1
 
-python-telegram-bot
 pyyaml
-
-###
 requests[security]
 certifi
 
-###
-# for words recognition
-# pymorphy2
-# pymorphy2-dicts-ru
-
-
-# google-api-python-client
-# gsheets
 oauth2client
 PyOpenSSL
 gspread
 
 # sqlalchemy
-# pyodbc
-# pymssql
+psycopg2
+
+peewee
 
 numpy
 pandas
