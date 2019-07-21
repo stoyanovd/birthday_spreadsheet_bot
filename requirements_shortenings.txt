@@ -13,8 +13,11 @@ certifi
 # pymorphy2-dicts-ru
 
 
-google-api-python-client
-gsheets
+# google-api-python-client
+# gsheets
+oauth2client
+PyOpenSSL
+gspread
 
 sqlalchemy
 pyodbc
@@ -24,3 +27,4 @@ numpy
 pandas
 
 sentry-sdk==0.3.11
+newrelic

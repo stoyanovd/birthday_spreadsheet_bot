@@ -1,6 +1,7 @@
 __pycache*
 
 .env*
+secure
 
 *.log
 logs

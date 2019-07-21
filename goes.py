@@ -1,96 +1,115 @@
+import datetime
+import json
 import os
+import yaml
 
 from telegram.ext import Updater, CommandHandler
 import logging
 from telegram.ext import MessageHandler, Filters
-import pymorphy2
+from bd_const import env_variables as BD
+from gsheet_helpers import gspread_helper
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
 
-def start(bot, update):
+def init():
+    env_file = '.env.yaml'
+    if os.path.exists(env_file):
+        print('find local env file')
+        with open(env_file, 'r') as f:
+            data = yaml.safe_load(f)
+            for k, v in data.items():
+                os.environ[k] = str(v)
+
+    assert BD.BD_BOT_TELEGRAM_BOT_TOKEN in os.environ.keys()
+
+    BOT_USERS = json.loads(os.environ.get(BD.BD_BOT_STIL_USERS))
+
+    BD_DF = gspread_helper.get_dates_persons_df()
+    print(BD_DF)
+    print(BOT_USERS)
+    return BD_DF, BOT_USERS
+
+
+########################
+BD_DF, BOT_USERS = init()
+
+
+########################
+
+
+def command_start(bot, update):
     update.message.reply_text('Hello World!')
 
 
-def hello(bot, update):
+def command_hello(bot, update):
     # update.message.reply_text(
     #     'Hello {}'.format(update.message.from_user.first_name))
     t = 'Hello'
+    user = update.message.from_user.username
     update.message.reply_text(t)
 
 
-orders_dict = {
-    'VERB': 4,
-    'INFN': 3,
-    'PRED': 2
-}
+def command_today(bot, update):
+    # update.message.reply_text(
+    #     'Hello {}'.format(update.message.from_user.first_name))
+    user = update.message.from_user.username
+    if user not in BOT_USERS:
+        update.message.reply_text('У вас нет разрешения на доступ. Обратитесь к @stoyanovd')
+        return
+    current_date = datetime.datetime.now().date()
+
+    today = BD_DF[BD_DF['bd_date'].dt.date == current_date]
+    print(today)
+    if len(today) == 0:
+        t = 'Сегодня нет дней рождения.'
+    else:
+        t = 'Сегодня День рождения у ' + ','.join(today['person'])
+    update.message.reply_text(t)
 
 
-def sorting_rule(word_desc):
-    for k in orders_dict.keys():
-        if k in word_desc:
-            return orders_dict[k]
-    return 0
-
-
-def echo(bot, update):
+def command_echo(bot, update):
     # global d
     bot.send_message(chat_id=update.message.chat_id, text="let's work with it")
 
     msg = update.message.text
     print(msg)
 
-    morph = pymorphy2.MorphAnalyzer()
+    bot.send_message(chat_id=update.message.chat_id, text='rr')
 
-    a = msg.split(' ')
-    [print(morph.parse(a[i])[0].tag) for i in range(min(len(a), 20))]
-    a = sorted(a, key=lambda s: sorting_rule(morph.parse(s)[0].tag))
 
-    ans = ' '.join(a)
-    bot.send_message(chat_id=update.message.chat_id, text=ans)
+def main():
+    #################################################
+    TELEGRAM_BOT_TOKEN = os.environ.get(BD.BD_BOT_TELEGRAM_BOT_TOKEN)
+    PORT = int(os.environ.get(BD.BD_BOT_PORT, '5000'))
+    BOT_WEBHOOK_URL = os.environ.get(BD.BD_BOT_WEBHOOK_URL)
+
+    updater = Updater(TELEGRAM_BOT_TOKEN)
+
+    dispatcher = updater.dispatcher
+    dispatcher.add_handler(CommandHandler('start', command_start))
+    dispatcher.add_handler(CommandHandler('hello', command_hello))
+    dispatcher.add_handler(CommandHandler('today', command_today))
+
+    dispatcher.add_handler(MessageHandler(Filters.text, command_echo))
+
+    print("finish set up bot.")
+
+    use_polling = True
+    if use_polling:
+        updater.start_polling()
+    else:
+        updater.start_webhook(listen="0.0.0.0",
+                              port=PORT,
+                              url_path="" + TELEGRAM_BOT_TOKEN)
+        updater.bot.set_webhook(BOT_WEBHOOK_URL + TELEGRAM_BOT_TOKEN)
+
+    print("before idle")
+    updater.idle()
+    print("after idle")
 
 
 #################################################
-from yaml import load, dump
-
-env_file = '.env.yaml'
-
-token_str = 'TELEGRAM_BOT_TOKEN'
-
-if os.path.exists(env_file):
-    print('find local env file')
-    with open(env_file, 'r') as f:
-        data = load(f)
-        assert token_str in data.keys()
-        os.environ[token_str] = data[token_str]
-
-assert token_str in os.environ.keys()
-
-TOKEN = os.environ.get(token_str)
-PORT = int(os.environ.get('PORT', '5000'))
-
-#################################################
-
-
-updater = Updater(TOKEN)
-
-dispatcher = updater.dispatcher
-dispatcher.add_handler(CommandHandler('start', start))
-dispatcher.add_handler(CommandHandler('hello', hello))
-
-dispatcher.add_handler(MessageHandler(Filters.text, echo))
-
-print("finish set up bot.")
-
-updater.start_webhook(listen="0.0.0.0",
-                      port=PORT,
-                      url_path="" + TOKEN)
-updater.bot.set_webhook("https://yodabotrus.herokuapp.com/" + TOKEN)
-
-# time to try webhooks
-# updater.start_polling()
-
-print("before idle")
-updater.idle()
-print("after idle")
+if __name__ == '__main__':
+    main()

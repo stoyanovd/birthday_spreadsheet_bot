@@ -2,7 +2,7 @@ import os
 
 SCOPES = 'https://www.googleapis.com/auth/drive.readonly'
 
-from secure.local_path import secure_path
+# from secure.local_path import secure_path
 
 from gsheets import Sheets
 
