@@ -16,6 +16,15 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 import peewee as P
 from playhouse.db_url import connect
 
+BD_DF = None
+BOT_USERS = None
+
+
+def refresh_gspread_and_bot_users():
+    global BD_DF, BOT_USERS
+    BD_DF = gspread_helper.get_dates_persons_df()
+    BOT_USERS = json.loads(os.environ.get(BD.BD_BOT_STIL_USERS))
+
 
 ########################################################################
 def init():
@@ -29,19 +38,15 @@ def init():
 
     assert BD.BD_BOT_TELEGRAM_BOT_TOKEN in os.environ.keys()
 
-    BOT_USERS = json.loads(os.environ.get(BD.BD_BOT_STIL_USERS))
-    BD_DF = gspread_helper.get_dates_persons_df()
-    DATABASE_URL = os.environ['DATABASE_URL']
+    refresh_gspread_and_bot_users()
 
     print(BD_DF)
     print(BOT_USERS)
 
-    return BD_DF, BOT_USERS, DATABASE_URL
 
-
-BD_DF, BOT_USERS, DATABASE_URL = init()
+init()
 # BD_DATABASE = P.PostgresqlDatabase(DATABASE_URL)
-BD_DATABASE = connect(DATABASE_URL)
+BD_DATABASE = connect(os.environ['DATABASE_URL'])
 
 
 ########################################################################
@@ -83,15 +88,12 @@ def create_user_if_needed(username, chat_id):
 
 
 def command_start(bot, update):
-    update.message.reply_text('Hello World!')
+    username = update.message.from_user.username
+    chat_id = update.message.chat_id
+    create_user_if_needed(username, chat_id)
 
-
-def command_hello(bot, update):
-    # update.message.reply_text(
-    #     'Hello {}'.format(update.message.from_user.first_name))
-    t = 'Hello'
-    user = update.message.from_user.username
-    update.message.reply_text(t)
+    update.message.reply_text('Привет! Я буду слать вам напоминания о днях рождения, '
+                              'записанных в ваш google spreadsheet документ.')
 
 
 def get_text_of_today(is_income_question):
@@ -128,7 +130,7 @@ def command_today(bot, update):
     send_today(bot, username, chat_id, False)
 
 
-def callback_minute_per_user(bot, job, user):
+def send_notifications_per_user(bot, job, user):
     # current_date = datetime.datetime.now().date()
     current_msk_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=3)).time()
     time_is_early = 'early' if current_msk_time < datetime.time(hour=7) else 'good'
@@ -155,14 +157,17 @@ def callback_minute_per_user(bot, job, user):
         # bot.send_message(chat_id=update.message.chat_id, text="let's work with it")
 
 
-def callback_minute(bot, job):
+def callback_send_notifications_morning(bot, job):
     if User.select().count() == 0:
         print('no rows in User. return')
         return
+
+    refresh_gspread_and_bot_users()
+
     users = list(User.select())
     print('users: ', users)
     for u in users:
-        callback_minute_per_user(bot, job, u)
+        send_notifications_per_user(bot, job, u)
 
 
 def command_echo(bot, update):
@@ -186,15 +191,14 @@ def main():
 
     dispatcher = updater.dispatcher
     dispatcher.add_handler(T.CommandHandler('start', command_start))
-    dispatcher.add_handler(T.CommandHandler('hello', command_hello))
     dispatcher.add_handler(T.CommandHandler('today', command_today))
 
-    dispatcher.add_handler(T.MessageHandler(T.Filters.text, command_echo))
+    # dispatcher.add_handler(T.MessageHandler(T.Filters.text, command_echo))
 
     j = updater.job_queue
     job_interval = 60 * 10
     # job_interval = 60
-    job_for_check = j.run_repeating(callback_minute, interval=job_interval, first=0)
+    job_for_check = j.run_repeating(callback_send_notifications_morning, interval=job_interval, first=0)
 
     print("finish set up bot.")
 
