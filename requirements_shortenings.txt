@@ -1,0 +1,26 @@
+# default server
+
+python-telegram-bot
+pyyaml
+
+###
+requests[security]
+certifi
+
+###
+# for words recognition
+# pymorphy2
+# pymorphy2-dicts-ru
+
+
+google-api-python-client
+gsheets
+
+sqlalchemy
+pyodbc
+pymssql
+
+numpy
+pandas
+
+sentry-sdk==0.3.11
