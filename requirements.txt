@@ -20,7 +20,6 @@ pyasn1==0.4.5
 pyasn1-modules==0.2.5
 pycparser==2.19
 pymssql==2.1.4
-pyodbc==4.0.26
 pyOpenSSL==19.0.0
 python-dateutil==2.8.0
 python-telegram-bot==11.1.0

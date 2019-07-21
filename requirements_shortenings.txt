@@ -19,9 +19,9 @@ oauth2client
 PyOpenSSL
 gspread
 
-sqlalchemy
-pyodbc
-pymssql
+# sqlalchemy
+# pyodbc
+# pymssql
 
 numpy
 pandas
