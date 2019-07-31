@@ -36,7 +36,7 @@ def check_spreadsheet_errors(cell_list, header_rows):
     error_message = ''
     for i in range(len(cell_list)):
         row = cell_list[i]
-        row = row[:2]
+        row = row[:3]
         c = len(error_message)
         if len(row) < 3:
             error_message += os.linesep + 'Строка ' + str(i + 1 + header_rows) + '. Не заполнена целиком.'
