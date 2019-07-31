@@ -36,6 +36,7 @@ def check_spreadsheet_errors(cell_list, header_rows):
     error_message = ''
     for i in range(len(cell_list)):
         row = cell_list[i]
+        row = row[:2]
         c = len(error_message)
         if len(row) < 3:
             error_message += os.linesep + 'Строка ' + str(i + 1 + header_rows) + '. Не заполнена целиком.'
@@ -55,7 +56,7 @@ def check_spreadsheet_errors(cell_list, header_rows):
 
 
 def pandas_conversion(cell_list):
-    # don't use pandas because I need per-row error checking
+    # don't use pandas from start because I need per-row error checking
     df = pd.DataFrame(cell_list, columns=['month', 'day', 'person'])
     df['month'] = df['month'].str.lower()
     df['month_int'] = df['month'].map(MONTHES_DICT).astype(np.int)
