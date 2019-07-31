@@ -3,9 +3,29 @@ import json
 import os
 import yaml
 import logging
+from functools import wraps
+import time
 
+logger = logging.getLogger(__name__)
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
+
+
+def timed(func):
+    """This decorator prints the execution time for the decorated function."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        logger.info("Start of {}.".format(func.__name__))
+
+        result = func(*args, **kwargs)
+        end = time.time()
+
+        logger.info("{} ran in {}s".format(func.__name__, round(end - start, 2)))
+        return result
+
+    return wrapper
 
 
 ########################################################################
@@ -91,12 +111,14 @@ def db_init():
 db_init()
 
 
+@timed
 def create_user_if_needed(username, chat_id):
     if User.select(User.username == username).count() == 0:
         new_user = User(username=username, chat_id=chat_id)
         new_user.save()
 
 
+@timed
 def command_start(bot, update):
     username = update.message.from_user.username
     chat_id = update.message.chat_id
@@ -106,6 +128,7 @@ def command_start(bot, update):
                               'записанных в ваш google spreadsheet документ.')
 
 
+@timed
 def get_text_of_today(is_income_question):
     current_date = datetime.datetime.utcnow().date()
     today = BD_DF[BD_DF['bd_date'].dt.date == current_date]
@@ -119,6 +142,7 @@ def get_text_of_today(is_income_question):
     return t
 
 
+@timed
 def send_today(bot, username, chat_id, is_income_question):
     create_user_if_needed(username, chat_id)
 
@@ -134,6 +158,7 @@ def send_today(bot, username, chat_id, is_income_question):
     bot.send_message(chat_id=chat_id, text=t)
 
 
+@timed
 def command_today(bot, update):
     username = update.message.from_user.username
     chat_id = update.message.chat_id
@@ -145,6 +170,7 @@ def command_today(bot, update):
     send_today(bot, username, chat_id, False)
 
 
+@timed
 def send_notifications_per_user(bot, job, user, error_message):
     # current_date = datetime.datetime.now().date()
     current_msk_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=3)).time()
@@ -174,6 +200,7 @@ def send_notifications_per_user(bot, job, user, error_message):
         # bot.send_message(chat_id=update.message.chat_id, text="let's work with it")
 
 
+@timed
 def callback_send_notifications_morning(bot, job):
     if User.select().count() == 0:
         print('no rows in User. return')
@@ -187,6 +214,7 @@ def callback_send_notifications_morning(bot, job):
         send_notifications_per_user(bot, job, u, error_message)
 
 
+@timed
 def command_echo(bot, update):
     # global d
     bot.send_message(chat_id=update.message.chat_id, text="let's work with it")
@@ -197,6 +225,7 @@ def command_echo(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text='rr')
 
 
+@timed
 def main():
     # return
     #################################################
