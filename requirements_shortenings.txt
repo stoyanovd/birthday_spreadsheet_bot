@@ -17,5 +17,8 @@ peewee
 numpy
 pandas
 
-sentry-sdk==0.3.11
+sentry-sdk==0.10.2
 newrelic
+
+###
+# pip install -r requirements_shortenings.txt && pip freeze > requirements.txt

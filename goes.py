@@ -4,15 +4,35 @@ import os
 import yaml
 import logging
 
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
+
+
+########################################################################
+def env_init():
+    env_file = '.env.yaml'
+    if os.path.exists(env_file):
+        print('find local env file')
+        with open(env_file, 'r') as f:
+            data = yaml.safe_load(f)
+            for k, v in data.items():
+                os.environ[k] = str(v)
+
+
+########################################################################
+env_init()
+import sentry_sdk
+
+sentry_sdk.init(os.environ['SENTRY_TOKEN_URL'])
+
+########################################################################
+
 from telegram import ext as T
 import peewee as P
 from playhouse.db_url import connect
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-
-from bd_const import env_variables as BD
 from gsheet_helpers import gspread_helper
+from bd_const import env_variables as BD
 
 BD_DF = None
 BOT_USERS = None
@@ -25,16 +45,7 @@ def refresh_gspread_and_bot_users():
     return error_message
 
 
-########################################################################
-def init():
-    env_file = '.env.yaml'
-    if os.path.exists(env_file):
-        print('find local env file')
-        with open(env_file, 'r') as f:
-            data = yaml.safe_load(f)
-            for k, v in data.items():
-                os.environ[k] = str(v)
-
+def init_second():
     assert BD.BD_BOT_TELEGRAM_BOT_TOKEN in os.environ.keys()
 
     refresh_gspread_and_bot_users()
@@ -43,7 +54,7 @@ def init():
     print(BOT_USERS)
 
 
-init()
+init_second()
 # BD_DATABASE = P.PostgresqlDatabase(DATABASE_URL)
 BD_DATABASE = connect(os.environ['DATABASE_URL'])
 
@@ -74,7 +85,7 @@ def db_init():
     db = BD_DATABASE
     db.connect()
     ##    # db.drop_tables([User, Notification])
-    db.create_tables([User, Notification])
+    # db.create_tables([User, Notification])
 
 
 db_init()
