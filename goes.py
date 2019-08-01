@@ -153,7 +153,7 @@ def send_today(bot, username, chat_id, is_auto_notification):
     else:
         t = get_text_of_today(is_auto_notification)
 
-    n = Notification(user=User.select().where(username == username),
+    n = Notification(user=User.get(User.username == username).id,
                      message=t,
                      is_auto_notification=is_auto_notification)
     n.save()
