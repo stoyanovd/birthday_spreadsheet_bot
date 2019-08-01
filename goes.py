@@ -113,7 +113,9 @@ db_init()
 
 @timed
 def create_user_if_needed(username, chat_id):
+    print('check user, count==', User.select().where(User.username == username).count())
     if User.select().where(User.username == username).count() == 0:
+        print('New user addition : ', username, chat_id)
         new_user = User(username=username, chat_id=chat_id)
         new_user.save()
 
@@ -162,12 +164,29 @@ def send_today(bot, username, chat_id, is_income_question):
 def command_today(bot, update):
     username = update.message.from_user.username
     chat_id = update.message.chat_id
+    if username not in BOT_USERS:
+        t = 'У вас нет разрешения на доступ. Обратитесь к @stoyanovd'
+        bot.send_message(chat_id=chat_id, text=t)
+        return
 
     error_message = refresh_gspread_and_bot_users()
     if error_message:
         bot.send_message(chat_id=chat_id, text="У вас в Spreadsheet есть ошибки: " + error_message)
 
     send_today(bot, username, chat_id, False)
+
+
+@timed
+def command_debug(bot, update):
+    username = update.message.from_user.username
+    chat_id = update.message.chat_id
+    if username not in BOT_USERS:
+        t = 'У вас нет разрешения на доступ. Обратитесь к @stoyanovd'
+        bot.send_message(chat_id=chat_id, text=t)
+        return
+
+    t = str([(u, u.username, u.chat_id) for u in User.select()])
+    bot.send_message(chat_id=chat_id, text=t)
 
 
 @timed
@@ -241,6 +260,7 @@ def main():
     dispatcher = updater.dispatcher
     dispatcher.add_handler(T.CommandHandler('start', command_start))
     dispatcher.add_handler(T.CommandHandler('today', command_today))
+    dispatcher.add_handler(T.CommandHandler('debug', command_debug))
 
     # dispatcher.add_handler(T.MessageHandler(T.Filters.text, command_echo))
 
