@@ -113,7 +113,7 @@ db_init()
 
 @timed
 def create_user_if_needed(username, chat_id):
-    if User.select(User.username == username).count() == 0:
+    if User.select().where(User.username == username).count() == 0:
         new_user = User(username=username, chat_id=chat_id)
         new_user.save()
 
@@ -207,10 +207,13 @@ def callback_send_notifications_morning(bot, job):
         return
 
     error_message = refresh_gspread_and_bot_users()
+    if error_message:
+        print(error_message)
 
     users = list(User.select())
     print('users: ', users)
     for u in users:
+        print(u, u.username, u.chat_id)
         send_notifications_per_user(bot, job, u, error_message)
 
 

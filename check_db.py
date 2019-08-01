@@ -16,6 +16,7 @@ from goes import db_init, BaseModel, User, Notification
 
 
 def main():
+    print('====================')
     users = User.select().count()
     print(users)
 

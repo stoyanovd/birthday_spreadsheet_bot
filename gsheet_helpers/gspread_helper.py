@@ -72,7 +72,7 @@ def pandas_conversion(cell_list):
 
 def get_dates_persons_df():
     cell_list = download_sheets()
-    print(cell_list)
+    print(str(cell_list)[:50])
     # use pandas only after per-row error checking
     well_formed_cell_list, error_message = check_spreadsheet_errors(cell_list, header_rows=1)
 
