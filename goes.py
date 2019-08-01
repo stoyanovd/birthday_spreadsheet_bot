@@ -190,7 +190,7 @@ def command_debug(bot, update):
 
 
 @timed
-def send_notifications_per_user(bot, job, user, error_message):
+def send_notifications_per_user(bot, user, error_message):
     # current_date = datetime.datetime.now().date()
     current_msk_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=3)).time()
     time_is_early = 'early' if current_msk_time < datetime.time(hour=7) else 'good'
@@ -233,7 +233,24 @@ def callback_send_notifications_morning(bot, job):
     print('users: ', users)
     for u in users:
         print(u, u.username, u.chat_id)
-        send_notifications_per_user(bot, job, u, error_message)
+        send_notifications_per_user(bot, u, error_message)
+
+
+@timed
+def command_manual_check(bot, update):
+    if User.select().count() == 0:
+        print('no rows in User. return')
+        return
+
+    error_message = refresh_gspread_and_bot_users()
+    if error_message:
+        print(error_message)
+
+    users = list(User.select().where(User.username == 'stoyanovd'))
+    print('users: ', users)
+    for u in users:
+        print(u, u.username, u.chat_id)
+        send_notifications_per_user(bot, u, error_message)
 
 
 @timed
@@ -261,6 +278,7 @@ def main():
     dispatcher.add_handler(T.CommandHandler('start', command_start))
     dispatcher.add_handler(T.CommandHandler('today', command_today))
     dispatcher.add_handler(T.CommandHandler('debug', command_debug))
+    dispatcher.add_handler(T.CommandHandler('manual_check', command_manual_check))
 
     # dispatcher.add_handler(T.MessageHandler(T.Filters.text, command_echo))
 
