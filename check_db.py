@@ -18,8 +18,16 @@ from goes import db_init, BaseModel, User, Notification
 def main():
     print('====================')
     users = User.select().count()
+    users = User.select()
     print(users)
 
+    for u in users:
+        notification_for_user_today = Notification.select().join(User).where(
+            (User.username == u.username) &
+            (Notification.created_date >= datetime.date.today()) &
+            (Notification.is_auto_notification == True)
+        ).count()
+        print(u .username, notification_for_user_today)
 
 if __name__ == '__main__':
     main()

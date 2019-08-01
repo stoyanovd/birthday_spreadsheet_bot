@@ -205,7 +205,7 @@ def send_notifications_per_user(bot, user, error_message):
     notification_for_user_today = Notification.select().join(User).where(
         (User.username == username) &
         (Notification.created_date >= datetime.date.today()) &
-        (Notification.is_auto_notification is True)
+        (Notification.is_auto_notification == True)
     ).count()
 
     print('user:', username,
