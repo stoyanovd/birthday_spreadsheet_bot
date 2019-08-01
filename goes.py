@@ -113,7 +113,7 @@ db_init()
 
 @timed
 def create_user_if_needed(username, chat_id):
-    print('check user, count==', User.select().where(User.username == username).count())
+    print('check user exists,', username, ',count==', User.select().where(User.username == username).count())
     if User.select().where(User.username == username).count() == 0:
         print('New user addition : ', username, chat_id)
         new_user = User(username=username, chat_id=chat_id)
@@ -145,17 +145,17 @@ def get_text_of_today(is_income_question):
 
 
 @timed
-def send_today(bot, username, chat_id, is_income_question):
+def send_today(bot, username, chat_id, is_auto_notification):
     create_user_if_needed(username, chat_id)
 
     if username not in BOT_USERS:
         t = 'У вас нет разрешения на доступ. Обратитесь к @stoyanovd'
     else:
-        t = get_text_of_today(is_income_question)
+        t = get_text_of_today(is_auto_notification)
 
-    n = Notification(user=User.get(username == username),
+    n = Notification(user=User.select().where(username == username),
                      message=t,
-                     is_auto_notification=is_income_question)
+                     is_auto_notification=is_auto_notification)
     n.save()
     bot.send_message(chat_id=chat_id, text=t)
 
@@ -205,7 +205,7 @@ def send_notifications_per_user(bot, job, user, error_message):
     notification_for_user_today = Notification.select().join(User).where(
         (User.username == username) &
         (Notification.created_date >= datetime.date.today()) &
-        (Notification.is_auto_notification == True)
+        (Notification.is_auto_notification is True)
     ).count()
 
     print('user:', username,
