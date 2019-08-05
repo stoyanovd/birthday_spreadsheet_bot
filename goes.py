@@ -193,7 +193,7 @@ def command_debug(bot, update):
 def send_notifications_per_user(bot, user, error_message):
     # current_date = datetime.datetime.now().date()
     current_msk_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=3)).time()
-    time_is_early = 'early' if current_msk_time < datetime.time(hour=7) else 'good'
+    time_is_early = 'early' if current_msk_time < datetime.time(hour=8, minute=45) else 'good'
     print(current_msk_time, time_is_early)
     if time_is_early == 'early':
         return
