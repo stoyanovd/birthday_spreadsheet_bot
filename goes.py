@@ -62,7 +62,7 @@ def refresh_gspread_and_bot_users():
     global BD_DF, BOT_USERS
     BD_DF, error_message = gspread_helper.get_dates_persons_df()
     print('BD_BOT_STIL_USERS=', os.environ.get(BD.BD_BOT_STIL_USERS))
-    BOT_USERS = json.loads(os.environ.get(BD.BD_BOT_STIL_USERS))
+    BOT_USERS = json.loads(os.environ.get(BD.BD_BOT_STIL_USERS), encoding='utf-8')
     return error_message
 
 
