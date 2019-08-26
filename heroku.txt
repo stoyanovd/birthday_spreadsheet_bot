@@ -1,0 +1,10 @@
+heroku login
+heroku create appname
+
+go to heroku, add github
+
+via python manual_vars_set.py
+manually add BD_BOT_SERVICE_ACCOUNT_CREDENTIALS
+
+heroku addons:create heroku-postgresql:hobby-dev
+export DATABASE_URL=$(heroku config:get DATABASE_URL -a appname)
