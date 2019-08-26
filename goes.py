@@ -133,7 +133,7 @@ def command_start(bot, update):
 
 @timed
 def get_text_of_today(is_income_question):
-    current_date = datetime.datetime.utcnow().date()
+    current_date = (datetime.datetime.utcnow() + datetime.timedelta(days=1)).date()
     today = BD_DF[BD_DF['bd_date'].dt.date == current_date]
     if len(today) > 0:
         t = 'Сегодня Дни рождения:' + os.linesep + os.linesep.join(today['person'])
