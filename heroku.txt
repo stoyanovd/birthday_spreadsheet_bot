@@ -8,3 +8,6 @@ manually add BD_BOT_SERVICE_ACCOUNT_CREDENTIALS
 
 heroku addons:create heroku-postgresql:hobby-dev
 export DATABASE_URL=$(heroku config:get DATABASE_URL -a appname)
+
+cron job
+0/5 7-21 * * *
