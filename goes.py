@@ -102,14 +102,14 @@ class Notification(BaseModel):
     is_auto_notification = P.BooleanField()
 
 
-def db_init():
-    db = BD_DATABASE
-    db.connect()
-    ##    # db.drop_tables([User, Notification])
-    # db.create_tables([User, Notification])
-
-
-db_init()
+# def db_init():
+#     db = BD_DATABASE
+#     db.connect()
+#     ##    # db.drop_tables([User, Notification])
+#     # db.create_tables([User, Notification])
+#
+#
+# db_init()
 
 
 @timed
@@ -132,15 +132,13 @@ def command_start(bot, update):
 
 
 @timed
-def get_text_of_today(is_income_question):
+def get_text_of_today():
     current_date = (datetime.datetime.utcnow() + datetime.timedelta(hours=3)).date()
     today = BD_DF[BD_DF['bd_date'].dt.date == current_date]
     if len(today) > 0:
         t = 'Сегодня Дни рождения:' + os.linesep + os.linesep.join(today['person'])
-    elif is_income_question:
-        t = 'Сегодня нет дней рождения.'
     else:
-        t = ''
+        t = 'Сегодня нет дней рождения.'
 
     return t
 
@@ -152,7 +150,7 @@ def send_today(bot, username, chat_id, is_auto_notification):
     if username not in BOT_USERS:
         t = 'У вас нет разрешения на доступ. Обратитесь к @stoyanovd'
     else:
-        t = get_text_of_today(is_auto_notification)
+        t = get_text_of_today()
 
     n = Notification(user=User.get(User.username == username).id,
                      message=t,
@@ -247,9 +245,9 @@ def command_manual_check(bot, update):
     if error_message:
         print(error_message)
 
-    users = list(User.select().where(User.username == 'stoyanovd'))
-    print('users: ', users)
-    for u in users:
+    users_me = list(User.select().where(User.username == 'stoyanovd'))
+    print('users_me: ', users_me)
+    for u in users_me:
         print(u, u.username, u.chat_id)
         send_notifications_per_user(bot, u, error_message)
 
@@ -286,7 +284,7 @@ def main():
     j = updater.job_queue
     job_interval = 60 * 10
     # job_interval = 60
-    job_for_check = j.run_repeating(callback_send_notifications_morning, interval=job_interval, first=0)
+    job_for_check = j.run_repeating(callback_send_notifications_morning, interval=job_interval, first=20)
 
     print("finish set up bot.")
 
