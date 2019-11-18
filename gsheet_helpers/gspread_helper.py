@@ -44,10 +44,17 @@ def check_spreadsheet_errors(cell_list, header_rows):
             continue
         if row[0].lower() not in MONTHES_DICT:
             error_message += os.linesep + 'Строка ' + str(i + 1 + header_rows) + '. Месяц не корректен.'
+            if row[2] is not None and len(row[2]) > 0:
+                error_message += ' Поэтому мы не знаем, когда поздравлять: ' + row[2] + '.'
+            error_message += ' Дозаполните, пожалуйста, данные!'
         if not row[1].isdigit():
             error_message += os.linesep + 'Строка ' + str(i + 1 + header_rows) + '. День месяца не корректен.'
+            if row[2] is not None and len(row[2]) > 0:
+                error_message += ' Поэтому мы не знаем, когда поздравлять: ' + row[2] + '.'
+            error_message += ' Дозаполните, пожалуйста, данные!'
         if len(row[2]) == 0:
             error_message += os.linesep + 'Строка ' + str(i + 1 + header_rows) + '. Именинник не заполнен.'
+            error_message += ' Дозаполните, пожалуйста, данные!'
 
         if len(error_message) == c:
             well_formed_cell_list += [row]
