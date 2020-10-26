@@ -131,6 +131,8 @@ def command_start(bot, update):
                               'записанных в ваш google spreadsheet документ.')
 
 
+M_ANSWERS_today_no_birthdays = 'Сегодня нет дней рождения.'
+
 @timed
 def get_text_of_today():
     current_date = (datetime.datetime.utcnow() + datetime.timedelta(hours=3)).date()
@@ -138,7 +140,7 @@ def get_text_of_today():
     if len(today) > 0:
         t = 'Сегодня Дни рождения:' + os.linesep + os.linesep.join(today['person'])
     else:
-        t = 'Сегодня нет дней рождения.'
+        t = M_ANSWERS_today_no_birthdays
 
     return t
 
@@ -152,11 +154,16 @@ def send_today(bot, username, chat_id, is_auto_notification):
     else:
         t = get_text_of_today()
 
+    is_empty = 1 if t == M_ANSWERS_today_no_birthdays else 0
+    print('is_empty=', is_empty,' . (In case of is_empty=1 message will not be sent)')
+
+    # we want to add is_empty to model, when we will make migrations
     n = Notification(user=User.get(User.username == username).id,
                      message=t,
                      is_auto_notification=is_auto_notification)
     n.save()
-    bot.send_message(chat_id=chat_id, text=t)
+    if is_empty == 0:
+        bot.send_message(chat_id=chat_id, text=t)
 
 
 @timed
@@ -288,7 +295,12 @@ def main():
 
     print("finish set up bot.")
 
-    use_polling = False
+    ########################
+    # False for webhooks - i.e. work on Heroku,
+    # True for polling, i.e. work from local computer
+
+    # use_polling = False
+    use_polling = True
     if use_polling:
         updater.start_polling()
     else:
