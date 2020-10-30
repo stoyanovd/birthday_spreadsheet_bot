@@ -299,8 +299,8 @@ def main():
     # False for webhooks - i.e. work on Heroku,
     # True for polling, i.e. work from local computer
 
-    # use_polling = False
-    use_polling = True
+    use_polling = False
+    # use_polling = True
     if use_polling:
         updater.start_polling()
     else:
