@@ -45,5 +45,16 @@ LC_COLLATE = 'ru_RU.utf8'
 LC_CTYPE = 'ru_RU.utf8';
 ```
 
+### Install python
+
+sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
+sudo apt install python3 python3-dev
+sudo apt install -y python3-pip
+sudo apt install -y python3-venv
+
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
 
 
