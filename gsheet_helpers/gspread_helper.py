@@ -19,6 +19,7 @@ import numpy as np
 
 def download_sheets():
     credentials_json = os.environ.get(BD.BD_BOT_SERVICE_ACCOUNT_CREDENTIALS)
+    # print(credentials_json)
     credentials = json.loads(credentials_json)
     credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials, scopes=SCOPES)
 

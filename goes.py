@@ -105,12 +105,12 @@ class Notification(BaseModel):
 # def db_init():
 #     db = BD_DATABASE
 #     db.connect()
-#     ##    # db.drop_tables([User, Notification])
-#     # db.create_tables([User, Notification])
+#     # db.drop_tables([User, Notification])
+#     db.create_tables([User, Notification])
 #
 #
 # db_init()
-
+# exit()
 
 @timed
 def create_user_if_needed(username, chat_id):
@@ -299,8 +299,8 @@ def main():
     # False for webhooks - i.e. work on Heroku,
     # True for polling, i.e. work from local computer
 
-    use_polling = False
-    # use_polling = True
+    # use_polling = False
+    use_polling = True
     if use_polling:
         updater.start_polling()
     else:
