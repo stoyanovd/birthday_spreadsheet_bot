@@ -28,6 +28,10 @@ def download_sheets():
     wks = gc.open_by_key(spreadsheet).sheet1
 
     cell_list = wks.get_all_values()
+    print(type(cell_list))
+
+    print(type(cell_list[0]))
+
     return cell_list
 
 

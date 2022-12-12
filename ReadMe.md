@@ -47,6 +47,9 @@ LC_CTYPE = 'ru_RU.utf8';
 
 ### Install python
 
+sudo apt-get install libpq-dev
+
+
 sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget
 sudo apt install python3 python3-dev
 sudo apt install -y python3-pip
@@ -56,5 +59,11 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
+### Let's try pyenv
+
+
+sudo apt-get install make build-essential libssl-dev zlib1g-dev \
+libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
+libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
 
 
