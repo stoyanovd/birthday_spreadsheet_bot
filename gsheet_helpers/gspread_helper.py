@@ -29,9 +29,8 @@ def download_sheets():
     wks = gc.open_by_key(spreadsheet).sheet1
 
     cell_list = wks.get_all_values()
-    print(type(cell_list))
-
-    print(type(cell_list[0]))
+    # print(type(cell_list))
+    # print(type(cell_list[0]))
 
     return cell_list
 
@@ -85,7 +84,7 @@ def pandas_conversion(cell_list):
 
 def get_dates_persons_df():
     cell_list = download_sheets()
-    print(str(cell_list)[:50])
+    # print(str(cell_list)[:50])
     # use pandas only after per-row error checking
     well_formed_cell_list, error_message = check_spreadsheet_errors(cell_list, header_rows=1)
 

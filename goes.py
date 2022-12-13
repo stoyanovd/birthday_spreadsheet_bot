@@ -9,13 +9,28 @@ import time
 import sys
 import io
 
-sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')
-sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')
+# sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
+# sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding='utf-8')
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+if not os.path.exists('logs'):
+    os.makedirs('logs')
+date_time_str = datetime.datetime.now().strftime("%Y-%m-%d__%H-%M-%S")
+logfile_path = 'logs/run_' + date_time_str + '.log'
 
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)  # or whatever
+handler = logging.FileHandler(logfile_path, 'w', 'utf-8')  # or whatever
+formatter = logging.Formatter(
+    '[%(asctime)s] p%(process)s {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s', '%m-%d %H:%M:%S')
+handler.setFormatter(formatter)
+root_logger.addHandler(handler)
+# logger = logging.getLogger(__name__)
+logger = root_logger
+
+def logger_print_info(*args):
+    logger.info(' '.join(map(str, list(args))))
+    
+##################################
 
 def timed(func):
     """This decorator prints the execution time for the decorated function."""
@@ -23,12 +38,12 @@ def timed(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         start = time.time()
-        logger.info("Start of {}.".format(func.__name__))
+        logger_print_info("Start of {}.".format(func.__name__))
 
         result = func(*args, **kwargs)
         end = time.time()
 
-        logger.info("{} ran in {}s".format(func.__name__, round(end - start, 2)))
+        logger_print_info("{} ran in {}s".format(func.__name__, round(end - start, 2)))
         return result
 
     return wrapper
@@ -38,7 +53,7 @@ def timed(func):
 def env_init():
     env_file = '.env.yaml'
     if os.path.exists(env_file):
-        print('find local env file')
+        logger_print_info('find local env file')
         with open(env_file, 'r') as f:
             data = yaml.safe_load(f)
             for k, v in data.items():
@@ -67,7 +82,7 @@ BOT_USERS = None
 def refresh_gspread_and_bot_users():
     global BD_DF, BOT_USERS
     BD_DF, error_message = gspread_helper.get_dates_persons_df()
-    print('BD_BOT_STIL_USERS=', os.environ.get(BD.BD_BOT_STIL_USERS))
+    logger_print_info('BD_BOT_STIL_USERS=', os.environ.get(BD.BD_BOT_STIL_USERS))
     BOT_USERS = json.loads(os.environ.get(BD.BD_BOT_STIL_USERS), encoding='utf-8')
     return error_message
 
@@ -77,8 +92,8 @@ def init_second():
 
     refresh_gspread_and_bot_users()
 
-    print(BD_DF)
-    print(BOT_USERS)
+    logger_print_info(BD_DF)
+    logger_print_info(BOT_USERS)
 
 
 init_second()
@@ -120,9 +135,9 @@ class Notification(BaseModel):
 
 @timed
 def create_user_if_needed(username, chat_id):
-    print('check user exists,', username, ',count==', User.select().where(User.username == username).count())
+    logger_print_info('check user exists,', username, ',count==', User.select().where(User.username == username).count())
     if User.select().where(User.username == username).count() == 0:
-        print('New user addition : ', username, chat_id)
+        logger_print_info('New user addition : ', username, chat_id)
         new_user = User(username=username, chat_id=chat_id)
         new_user.save()
 
@@ -138,6 +153,7 @@ def command_start(bot, update):
 
 
 M_ANSWERS_today_no_birthdays = 'Сегодня нет дней рождения.'
+
 
 @timed
 def get_text_of_today():
@@ -161,7 +177,7 @@ def send_today(bot, username, chat_id, is_auto_notification):
         t = get_text_of_today()
 
     is_empty = 1 if t == M_ANSWERS_today_no_birthdays else 0
-    print('is_empty=', is_empty,' . (In case of is_empty=1 message will not be sent)')
+    logger_print_info('is_empty=', is_empty, ' . (In case of is_empty=1 message will not be sent)')
 
     # we want to add is_empty to model, when we will make migrations
     n = Notification(user=User.get(User.username == username).id,
@@ -206,7 +222,7 @@ def send_notifications_per_user(bot, user, error_message):
     # current_date = datetime.datetime.now().date()
     current_msk_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=3)).time()
     time_is_early = 'early' if current_msk_time < datetime.time(hour=8, minute=20) else 'good'
-    print(current_msk_time, time_is_early)
+    logger_print_info(current_msk_time, time_is_early)
     if time_is_early == 'early':
         return
 
@@ -220,7 +236,7 @@ def send_notifications_per_user(bot, user, error_message):
         (Notification.is_auto_notification == True)
     ).count()
 
-    print('user:', username,
+    logger_print_info('user:', username,
           'chat_id: ', chat_id,
           'notification_for_user_today: ', notification_for_user_today)
 
@@ -234,34 +250,34 @@ def send_notifications_per_user(bot, user, error_message):
 @timed
 def callback_send_notifications_morning(bot, job):
     if User.select().count() == 0:
-        print('no rows in User. return')
+        logger_print_info('no rows in User. return')
         return
 
     error_message = refresh_gspread_and_bot_users()
     if error_message:
-        print(error_message)
+        logger_print_info(error_message)
 
     users = list(User.select())
-    print('users: ', users)
+    logger_print_info('users: ', users)
     for u in users:
-        print(u, u.username, u.chat_id)
+        logger_print_info(u, u.username, u.chat_id)
         send_notifications_per_user(bot, u, error_message)
 
 
 @timed
 def command_manual_check(bot, update):
     if User.select().count() == 0:
-        print('no rows in User. return')
+        logger_print_info('no rows in User. return')
         return
 
     error_message = refresh_gspread_and_bot_users()
     if error_message:
-        print(error_message)
+        logger_print_info(error_message)
 
     users_me = list(User.select().where(User.username == 'stoyanovd'))
-    print('users_me: ', users_me)
+    logger_print_info('users_me: ', users_me)
     for u in users_me:
-        print(u, u.username, u.chat_id)
+        logger_print_info(u, u.username, u.chat_id)
         send_notifications_per_user(bot, u, error_message)
 
 
@@ -271,7 +287,7 @@ def command_echo(bot, update):
     bot.send_message(chat_id=update.message.chat_id, text="let's work with it")
 
     msg = update.message.text
-    print(msg)
+    logger_print_info(msg)
 
     bot.send_message(chat_id=update.message.chat_id, text='rr')
 
@@ -299,7 +315,7 @@ def main():
     # job_interval = 60
     job_for_check = j.run_repeating(callback_send_notifications_morning, interval=job_interval, first=20)
 
-    print("finish set up bot.")
+    logger_print_info("finish set up bot.")
 
     ########################
     # False for webhooks - i.e. work on Heroku,
@@ -315,9 +331,9 @@ def main():
                               url_path="" + TELEGRAM_BOT_TOKEN)
         updater.bot.set_webhook(BOT_WEBHOOK_URL + TELEGRAM_BOT_TOKEN)
 
-    print("before idle")
+    logger_print_info("before idle")
     updater.idle()
-    print("after idle")
+    logger_print_info("after idle")
 
 
 #################################################
