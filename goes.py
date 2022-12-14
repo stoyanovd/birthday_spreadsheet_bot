@@ -12,6 +12,9 @@ import io
 # sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding='utf-8')
 # sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding='utf-8')
 
+import os, sys
+os.chdir(sys.path[0])
+
 if not os.path.exists('logs'):
     os.makedirs('logs')
 date_time_str = datetime.datetime.now().strftime("%Y-%m-%d__%H-%M-%S")
